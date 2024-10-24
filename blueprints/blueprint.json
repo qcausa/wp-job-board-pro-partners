@@ -22,7 +22,7 @@
       "step": "installPlugin",
       "pluginData": {
         "resource": "url",
-        "url": "https://github.com/qcausa/wp-job-board-pro/archive/refs/heads/main.zip"
+        "url": "https://github-proxy.com/proxy/?repo=wp-job-board-pro&branch=main"
       },
       "options": {
         "activate": true
