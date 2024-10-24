@@ -120,11 +120,12 @@ class WP_Job_Board_Pro_Partners_Custom_Fields extends WP_Job_Board_Pro_Custom_Fi
                     // elseif ( !empty($available_values) ) {
 					// 	$field_data = wp_parse_args( $custom_field, $available_values);
 					// 	$fieldtype = isset($available_values['type']) ? $available_values['type'] : '';
-					// } elseif ( in_array($fieldkey, $dtypes) ) {
-					// 	$fieldkey = isset($custom_field['key']) ? $custom_field['key'] : '';
-					// 	$fieldtype = isset($custom_field['type']) ? $custom_field['type'] : '';
-					// 	$field_data = $custom_field;
-					// }
+					// } 
+					elseif ( in_array($fieldkey, $dtypes) ) {
+						$fieldkey = isset($custom_field['key']) ? $custom_field['key'] : '';
+						$fieldtype = isset($custom_field['type']) ? $custom_field['type'] : '';
+						$field_data = $custom_field;
+					}
 					
 					if ( !$admin_field && (!empty($field_data['show_in_submit_form']) || $fieldtype == 'heading') && $fieldkey !== $prefix.'featured' ) {
 						if ( $prefix == WP_JOB_BOARD_PRO_CANDIDATE_PREFIX && $form_type == 'profile' && $field_data['show_in_submit_form_candidate'] !== 'profile' ) {
