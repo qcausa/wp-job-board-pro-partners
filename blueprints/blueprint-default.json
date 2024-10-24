@@ -36,6 +36,16 @@
       }
     },
     {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "bugfu-console-debugger"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
       "step": "wp-cli",
       "command": "wp post generate --count=5 --post_type=candidate --post_date=1999-01-04"
     },
