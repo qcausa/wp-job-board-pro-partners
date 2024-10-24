@@ -36,6 +36,18 @@
       }
     },
     {
+      "step": "wp-cli",
+      "command": "wp post generate --count=5 --post_type=candidate --post_date=1999-01-04"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp post generate --count=5 --post_type=employer --post_date=1999-01-04"
+    },
+    {
+      "step": "wp-cli",
+      "command": "wp post generate --count=5 --post_type=partner --post_date=1999-01-04"
+    },
+    {
       "step": "login",
       "username": "admin",
       "password": "password"
