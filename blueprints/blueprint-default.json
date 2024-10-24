@@ -47,7 +47,7 @@
     },
     {
       "step": "wp-cli",
-      "command": "wp db import ***"
+      "command": "wp db query < https://raw.githubusercontent.com/qcausa/wp-job-board-pro-partners/refs/heads/main/blueprints/wp_job_board_pro_options.sql"
     },
     {
       "step": "wp-cli",
