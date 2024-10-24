@@ -46,16 +46,12 @@
       }
     },
     {
-      "step": "writeFile",
-      "path": "/tmp/wp_job_board_pro_options.sql",
-      "data": {
-        "resource": "url",
-        "url": "https://raw.githubusercontent.com/qcausa/wp-job-board-pro-partners/refs/heads/main/blueprints/wp_job_board_pro_options.sql"
-      }
-    },
-    {
-      "step": "wp-cli",
-      "command": "cat /tmp/wp_job_board_pro_options.sql | wp db query"
+      "step": "runPHP",
+      "code": "<?php require_once 'wordpress/wp-load.php';
+        $sql = file_get_contents('https://raw.githubusercontent.com/qcausa/wp-job-board-pro-partners/refs/heads/main/blueprints/wp_job_board_pro_options.sql');
+        global $wpdb;
+        $wpdb->query($sql);
+      ?>"
     },
     {
       "step": "wp-cli",
