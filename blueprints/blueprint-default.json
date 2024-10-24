@@ -47,6 +47,10 @@
     },
     {
       "step": "wp-cli",
+      "command": "wp db import ***"
+    },
+    {
+      "step": "wp-cli",
       "command": "wp post generate --count=5 --post_type=candidate --post_date=1999-01-04"
     },
     {
@@ -56,6 +60,11 @@
     {
       "step": "wp-cli",
       "command": "wp post generate --count=5 --post_type=partner --post_date=1999-01-04"
+    },
+    {
+      "step": "writeFile",
+      "path": "/wordpress/wp-content/mu-plugins/rewrite.php",
+      "data": "<?php add_action( 'after_setup_theme', function() { global $wp_rewrite; $wp_rewrite->set_permalink_structure('/%postname%/'); $wp_rewrite->flush_rules(); } );"
     },
     {
       "step": "login",
