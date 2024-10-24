@@ -16,9 +16,6 @@
   },
   "steps": [
     {
-      "step": "resetData"
-    },
-    {
       "step": "installPlugin",
       "pluginData": {
         "resource": "url",
