@@ -55,7 +55,7 @@
     },
     {
       "step": "wp-cli",
-      "command": "wp db query < /tmp/wp_job_board_pro_options.sql"
+      "command": "cat /tmp/wp_job_board_pro_options.sql | wp db query"
     },
     {
       "step": "wp-cli",
