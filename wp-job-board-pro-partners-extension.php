@@ -27,7 +27,7 @@ class WP_Job_Board_Pro_Partners_Extension {
         self::setup_constants();
         self::includes();
         //add_action( 'init', array( __CLASS__, 'register_post_type' ) );
-        add_action( 'init', array( __CLASS__, 'register_user_role' ) );
+        //add_action( 'init', array( __CLASS__, 'register_user_role' ) );
         add_action( 'wp_job_board_pro_custom_field_partner_display_hooks', array( __CLASS__, 'partner_display_hooks' ) );
     }
 
@@ -41,7 +41,7 @@ class WP_Job_Board_Pro_Partners_Extension {
 
         add_filter( 'wp_job_board_pro_user_roles', array( __CLASS__, 'add_partner_role' ) );
         add_filter( 'wp_job_board_pro_candidate_user_role_excludes', array( __CLASS__, 'exclude_partner_default_registration' ), 10, 3 );
-        add_action( 'user_register', array( __CLASS__, 'partner_registration_save' ), 10, 1 );
+        add_action( 'user_register', array( __CLASS__, 'partner_registration_save' ), 5, 1 );
     }
 
     public static function includes() {
@@ -51,6 +51,8 @@ class WP_Job_Board_Pro_Partners_Extension {
         // Include the custom fields and other files for this plugin
         require_once WP_JOB_BOARD_PRO_PARTNER_PLUGIN_DIR . 'includes/custom-fields/class-fields-manager.php';
         require_once WP_JOB_BOARD_PRO_PARTNER_PLUGIN_DIR . 'includes/custom-fields/class-custom-fields.php';
+    
+        require_once WP_JOB_BOARD_PRO_PARTNER_PLUGIN_DIR . 'includes/class-user.php';
     }
 
     public static function dependency_notice() {
@@ -127,8 +129,12 @@ class WP_Job_Board_Pro_Partners_Extension {
     }
 
     public static function partner_registration_save( $user_id ) {
+        BugFu::log('partner_registration_save');
         $user = get_userdata( $user_id );
         if ( in_array( 'wp_job_board_pro_partner', (array) $user->roles ) ) {
+            // Dynamically remove the WP_Job_Board_Pro_User::registration_save method
+            remove_action( 'user_register', array( 'WP_Job_Board_Pro_User', 'registration_save' ), 10 );
+
             $post_title = $user->display_name;
             $post_content = '';
             $post_status = 'publish';
