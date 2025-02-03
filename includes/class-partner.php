@@ -14,7 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WP_Job_Board_Pro_Partner {
 	
 	public static function init() {
-
+		add_filter('cmb2_meta_boxes', array(__CLASS__, 'fields_front'));
+		add_filter('cmb2_meta_boxes', array(__CLASS__, 'fields'));
+		
 		// Ajax endpoints.
 		//add_action( 'wjbp_ajax_wp_job_board_pro_ajax_apply_email',  array(__CLASS__,'process_apply_email') );
 
@@ -1939,6 +1941,177 @@ class WP_Job_Board_Pro_Partner {
 	public static function display_candidate_feed(){
 		echo WP_Job_Board_Pro_Template_Loader::get_template_part('loop/candidate/candidates-rss-btn');
 	}
+
+	public static function fields( $metaboxes ) {
+		$prefix = WP_JOB_BOARD_PRO_PARTNER_PREFIX;
+		
+		$metaboxes[ $prefix . 'info' ] = array(
+			'id'                        => $prefix . 'info',
+			'title'                     => __( 'General Options', 'wp-job-board-pro-partners' ),
+			'object_types'             => array( 'partner' ),
+			'context'                  => 'normal',
+			'priority'                 => 'high',
+			'show_names'               => true,
+			'show_in_rest'             => true,
+			'fields'                   => array(
+				array(
+					'name'              => __( 'Email', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'email',
+					'type'              => 'text',
+				),
+				array(
+					'name'              => __( 'Phone', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'phone',
+					'type'              => 'text',
+				),
+				array(
+					'name'              => __( 'Website', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'website',
+					'type'              => 'text_url',
+				),
+				array(
+					'name'              => __( 'Founded Date', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'founded_date',
+					'type'              => 'text_date',
+				),
+				array(
+					'name'              => __( 'Organization Type', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'organization_type',
+					'type'              => 'select',
+					'options'           => array(
+						'non-profit'    => __('Non-Profit', 'wp-job-board-pro-partners'),
+						'government'    => __('Government Agency', 'wp-job-board-pro-partners'),
+						'educational'   => __('Educational Institution', 'wp-job-board-pro-partners'),
+						'private'       => __('Private Organization', 'wp-job-board-pro-partners'),
+						'other'         => __('Other', 'wp-job-board-pro-partners'),
+					),
+				),
+				array(
+					'name'              => __( 'Profile Photos', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'profile_photos',
+					'type'              => 'file_list',
+					'query_args'        => array( 'type' => 'image' ),
+					'description'       => __( 'Select one or more images to showcase your organization', 'wp-job-board-pro-partners' ),
+				),
+				array(
+					'name'              => __( 'Featured Image', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'featured_image',
+					'type'              => 'file',
+					'options'           => array(
+						'url'           => false,
+					),
+					'query_args'        => array( 'type' => 'image' ),
+				),
+				array(
+					'name'              => __( 'Address', 'wp-job-board-pro-partners' ),
+					'id'                => $prefix . 'address',
+					'type'              => 'text',
+				),
+				array(
+					'id'                => $prefix . 'map_location',
+					'name'              => __( 'Map Location', 'wp-job-board-pro-partners' ),
+					'type'              => 'pw_map',
+					'sanitization_cb'   => 'pw_map_sanitise',
+				),
+			)
+		);
+
+		return $metaboxes;
+	}
+
+	public static function fields_front( array $metaboxes ) {
+		if ( ! is_admin() ) {
+			$post_id = 0;
+			$user_id = WP_Job_Board_Pro_User::get_user_id();
+			if ( WP_Job_Board_Pro_Partners_User::is_partner($user_id) ) {
+				$post_id = WP_Job_Board_Pro_Partners_User::get_partner_by_user_id($user_id);
+				if ( !empty($post_id) ) {
+					$post = get_post( $post_id );
+					$featured_image = get_post_thumbnail_id( $post_id );
+				}
+			}
+			
+			$init_fields = apply_filters( 'wp-job-board-pro-partner-fields-front', array(), $post_id );
+			
+			$fields = array();
+			$i = 1;
+			$heading_count = 0;
+			$index = 0;
+			foreach ($init_fields as $field) {
+				$rfield = $field;
+				if ( $i == 1 ) {
+					if ( $field['type'] !== 'title' ) {
+						$fields[] = array(
+							'name' => esc_html__('General', 'wp-job-board-pro-partners'),
+							'type' => 'title',
+							'id'   => self::$prefix.'heading_general_title',
+							'priority' => 0,
+							'before_row' => '<div id="heading-'.self::$prefix.'heading_general_title" class="before-group-row before-group-row-'.$heading_count.' active"><div class="before-group-row-inner">',
+						);
+						$heading_count = 1;
+						$index = 0;
+					}
+				}
+				
+				if ( $rfield['id'] == self::$prefix . 'title' ) {
+					$rfield['default'] = !empty( $post ) ? $post->post_title : '';
+				} elseif ( $rfield['id'] == self::$prefix . 'description' ) {
+					$rfield['default'] = !empty( $post ) ? $post->post_content : '';
+				} elseif ( $rfield['id'] == self::$prefix . 'featured_image' ) {
+					$rfield['default'] = !empty( $featured_image ) ? $featured_image : '';
+				}
+
+				if ( $rfield['type'] == 'title' ) {
+					$before_row = '';
+					if ( $i > 1 ) {
+						$before_row .= '</div></div>';
+					}
+					$classes = '';
+					if ( !empty($rfield['number_columns']) ) {
+						$classes = 'columns-'.$rfield['number_columns'];
+					}
+					$before_row .= '<div id="heading-'.$rfield['id'].'" class="before-group-row before-group-row-'.$heading_count.' '.($heading_count == 0 ? 'active' : '').' '.$classes.'"><div class="before-group-row-inner">';
+
+					$rfield['before_row'] = $before_row;
+
+					$heading_count++;
+					$index++;
+				}
+
+				if ( $i == count($init_fields) ) {
+					if ( $rfield['type'] == 'group' ){
+						$rfield['after_group'] = '</div></div>';
+					} else {
+						$rfield['after_row'] = '</div></div>';
+					}
+				}
+
+				$fields[] = $rfield;
+
+				$i++;
+			}
+
+			$fields[] = array(
+				'id'                => self::$prefix . 'post_type',
+				'type'              => 'hidden',
+				'default'           => 'partner',
+				'priority'          => 100,
+			);
+
+			$fields = apply_filters( 'wp-job-board-pro-partner-fields', $fields, $post_id );
+			
+			$metaboxes[ self::$prefix . 'front' ] = array(
+				'id'                        => self::$prefix . 'front',
+				'title'                     => __( 'General Options', 'wp-job-board-pro-partners' ),
+				'object_types'              => array( 'partner' ),
+				'context'                   => 'normal',
+				'priority'                  => 'high',
+				'show_names'                => true,
+				'fields'                    => $fields
+			);
+		}
+		return $metaboxes;
+	}
 }
 
-WP_Job_Board_Pro_Candidate::init();
+WP_Job_Board_Pro_Partner::init();
